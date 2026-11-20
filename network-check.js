@@ -42,7 +42,6 @@ async function checkSchoolNetwork() {
         if (currentIP === expectedIP) {
             resultBox.innerHTML = `
                 <h3 style="color:green;">School Network Verified</h3>
-                <p>Public IP: ${currentIP}</p>
                 <p>Access permitted.</p>
             `;
 
