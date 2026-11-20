@@ -57,8 +57,6 @@ async function checkSchoolNetwork() {
 
             resultBox.innerHTML = `
                 <h3 style="color:red;">Access Restricted</h3>
-                <p><b>Your IP:</b> ${currentIP}</p>
-                <p><b>School IP:</b> ${expectedIP}</p>
                 <p>This examination portal is available only on the school network.</p>
             `;
 
