@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -76,11 +77,6 @@ button:hover {
   font-weight: bold;
 }
 
-.not-connected {
-  color: #b45309;
-  font-weight: bold;
-}
-
 .exam-container {
   display: none;
   margin-top: 22px;
@@ -138,56 +134,27 @@ footer {
 
   <h2>Available Examinations</h2>
 
-  <!-- COMPUTER SCIENCE -->
-  <div class="test">
+  <p id="loading">Loading examinations...</p>
 
-    <h3>Computer Science – Test 1</h3>
-
-    <p>Subject: Computer Science</p>
-
-    <p class="status">● Available</p>
-
-    <button onclick="openExam('cs-exam')">
-      Start Examination
-    </button>
-
-  </div>
-
-
-  <!-- MATHEMATICS -->
-  <div class="test">
-
-    <h3>Mathematics – Test 1</h3>
-
-    <p>Subject: Mathematics</p>
-
-    <p class="not-connected">● Not Connected Yet</p>
-
-    <button onclick="showMessage()">
-      Start Examination
-    </button>
-
-  </div>
+  <div id="exam-cards"></div>
 
 </div>
 
+<div id="exam-container" class="exam-container">
 
-<!-- COMPUTER SCIENCE EXAMINATION -->
-<div id="cs-exam" class="exam-container">
-
-  <button class="back-button" onclick="closeExam('cs-exam')">
+  <button class="back-button" onclick="closeExam()">
     ← Back to Examinations
   </button>
 
-  <h2>Computer Science – Test 1</h2>
+  <h2 id="exam-title"></h2>
 
   <p>Please complete and submit your examination.</p>
 
   <iframe
-    src="https://docs.google.com/forms/d/e/1FAIpQLSeWxeSSb8zMkQod4Y6CZChOTghkQ9I3M8Z1FjWJfSyG30N2bw/viewform?embedded=true"
+    id="exam-frame"
     loading="lazy"
-    title="Computer Science Examination">
-    Loading…
+    title="Online Examination">
+    Loading...
   </iframe>
 
 </div>
@@ -200,31 +167,239 @@ footer {
 
 <script>
 
-function openExam(examId) {
+// GOOGLE SHEET CSV LINK
+const SHEET_CSV_URL =
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vQ5r1cypu9sRyxzq_MzAt7IZvMFn9eThR4zDahvf6iczKyGr4sf0_T8sBKeSSJP61b04niQkbhKQegM/pub?gid=0&single=true&output=csv";
 
-  document.getElementById("exam-list").style.display = "none";
+// CURRENT CLASS
+const CURRENT_CLASS = "Class 10";
 
-  document.getElementById(examId).style.display = "block";
+const examCards = document.getElementById("exam-cards");
+const loading = document.getElementById("loading");
 
-  window.scrollTo(0, 0);
 
+// CSV READER
+function parseCSV(text) {
+
+  const rows = [];
+  let row = [];
+  let value = "";
+  let quoted = false;
+
+  for (let i = 0; i < text.length; i++) {
+
+    const char = text[i];
+    const next = text[i + 1];
+
+    if (char === '"' && quoted && next === '"') {
+
+      value += '"';
+      i++;
+
+    } else if (char === '"') {
+
+      quoted = !quoted;
+
+    } else if (char === "," && !quoted) {
+
+      row.push(value.trim());
+      value = "";
+
+    } else if ((char === "\n" || char === "\r") && !quoted) {
+
+      if (char === "\r" && next === "\n") i++;
+
+      row.push(value.trim());
+
+      if (row.some(cell => cell !== "")) {
+        rows.push(row);
+      }
+
+      row = [];
+      value = "";
+
+    } else {
+
+      value += char;
+
+    }
+  }
+
+  row.push(value.trim());
+
+  if (row.some(cell => cell !== "")) {
+    rows.push(row);
+  }
+
+  return rows;
 }
 
-function closeExam(examId) {
 
-  document.getElementById(examId).style.display = "none";
+// CREATE EXAMINATION CARD
+function createExamCard(subject, examName, formLink) {
+
+  const card = document.createElement("div");
+  card.className = "test";
+
+  const heading = document.createElement("h3");
+  heading.textContent = subject + " – " + examName;
+
+  const subjectText = document.createElement("p");
+  subjectText.textContent = "Subject: " + subject;
+
+  const status = document.createElement("p");
+  status.className = "status";
+  status.textContent = "● Available";
+
+  const button = document.createElement("button");
+  button.textContent = "Start Examination";
+
+  button.addEventListener("click", function() {
+    openExam(subject + " – " + examName, formLink);
+  });
+
+  card.append(heading, subjectText, status, button);
+
+  examCards.appendChild(card);
+}
+
+
+// OPEN EXAMINATION
+function openExam(title, link) {
+
+  try {
+
+    const url = new URL(link);
+
+    if (
+      url.hostname !== "docs.google.com" ||
+      !url.pathname.includes("/forms/")
+    ) {
+
+      alert("Invalid Google Form link. Please contact the school.");
+      return;
+
+    }
+
+    url.searchParams.set("embedded", "true");
+
+    document.getElementById("exam-title").textContent = title;
+
+    document.getElementById("exam-frame").src = url.href;
+
+    document.getElementById("exam-list").style.display = "none";
+
+    document.getElementById("exam-container").style.display = "block";
+
+    window.scrollTo(0, 0);
+
+  } catch (error) {
+
+    alert("The examination link is invalid.");
+
+  }
+}
+
+
+// CLOSE EXAMINATION
+function closeExam() {
+
+  document.getElementById("exam-container").style.display = "none";
 
   document.getElementById("exam-list").style.display = "block";
 
+  document.getElementById("exam-frame").src = "";
+
   window.scrollTo(0, 0);
 
 }
 
-function showMessage() {
 
-  alert("This examination has not been connected yet.");
+// LOAD EXAMINATIONS FROM GOOGLE SHEET
+async function loadExams() {
+
+  try {
+
+    const response = await fetch(SHEET_CSV_URL);
+
+    if (!response.ok) {
+      throw new Error("Could not load examination sheet.");
+    }
+
+    const csvText = await response.text();
+
+    const rows = parseCSV(csvText);
+
+    if (rows.length < 2) {
+
+      loading.textContent = "No examinations have been added yet.";
+      return;
+
+    }
+
+    const headers = rows[0].map(header =>
+      header.replace(/^\uFEFF/, "").trim().toLowerCase()
+    );
+
+    const classIndex = headers.indexOf("class");
+    const subjectIndex = headers.indexOf("subject");
+    const examIndex = headers.indexOf("exam name");
+    const linkIndex = headers.indexOf("google form url");
+    const statusIndex = headers.indexOf("status");
+
+    if (
+      [classIndex, subjectIndex, examIndex, linkIndex, statusIndex]
+      .some(index => index === -1)
+    ) {
+
+      throw new Error("Please check the column headings in Google Sheets.");
+
+    }
+
+    let count = 0;
+
+    rows.slice(1).forEach(row => {
+
+      const className = (row[classIndex] || "").trim();
+      const subject = (row[subjectIndex] || "").trim();
+      const examName = (row[examIndex] || "").trim();
+      const formLink = (row[linkIndex] || "").trim();
+      const status = (row[statusIndex] || "").trim().toLowerCase();
+
+      if (
+  className.trim().toLowerCase() === "class 8" &&
+  status.trim().toLowerCase() === "active" &&
+  subject &&
+  examName &&
+  formLink
+) {
+
+        createExamCard(subject, examName, formLink);
+
+        count++;
+
+      }
+
+    });
+
+    loading.textContent = count
+      ? ""
+      : "No examinations are currently available.";
+
+  } catch (error) {
+
+    console.error(error);
+
+    loading.textContent =
+      "Unable to load examinations. Please check your internet connection or contact the school.";
+
+  }
 
 }
+
+
+// START
+loadExams();
 
 </script>
 
