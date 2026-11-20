@@ -1,12 +1,29 @@
 
-/* ==================================
-   SCHOOL EXAMINATION NETWORK CHECK
-   ================================== */
+// SCHOOL NETWORK CHECK
 
-// Replace this with your school's PUBLIC IPv4 address
 const SCHOOL_PUBLIC_IP = "152.59.118.104";
 
 async function checkSchoolNetwork() {
+    const resultBox = document.createElement("div");
+
+    resultBox.style.cssText = `
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        z-index: 999999;
+        background: white;
+        color: #222;
+        padding: 20px;
+        border: 2px solid #333;
+        border-radius: 12px;
+        font-family: Arial, sans-serif;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    `;
+
+    resultBox.innerHTML = "<h3>Checking school network...</h3>";
+    document.body.appendChild(resultBox);
+
     try {
         const response = await fetch(
             "https://api.ipify.org?format=json",
@@ -14,62 +31,53 @@ async function checkSchoolNetwork() {
         );
 
         if (!response.ok) {
-            throw new Error("Unable to verify network");
+            throw new Error("Could not verify network.");
         }
 
-        const result = await response.json();
+        const data = await response.json();
 
-        if (result.ip !== SCHOOL_PUBLIC_IP) {
-            return false;
+        const currentIP = String(data.ip).trim();
+        const expectedIP = SCHOOL_PUBLIC_IP.trim();
+
+        if (currentIP === expectedIP) {
+            resultBox.innerHTML = `
+                <h3 style="color:green;">School Network Verified</h3>
+                <p>Public IP: ${currentIP}</p>
+                <p>Access permitted.</p>
+            `;
+
+            window.schoolNetworkAllowed = true;
+
+            setTimeout(() => {
+                resultBox.remove();
+            }, 2000);
+
+        } else {
+            window.schoolNetworkAllowed = false;
+
+            resultBox.innerHTML = `
+                <h3 style="color:red;">Access Restricted</h3>
+                <p><b>Your IP:</b> ${currentIP}</p>
+                <p><b>School IP:</b> ${expectedIP}</p>
+                <p>This examination portal is available only on the school network.</p>
+            `;
+
+            document.body.innerHTML = "";
+            document.body.appendChild(resultBox);
         }
-
-        return true;
 
     } catch (error) {
-        console.error("Network verification failed:", error);
-        return false;
+        window.schoolNetworkAllowed = false;
+
+        resultBox.innerHTML = `
+            <h3 style="color:red;">Network Check Failed</h3>
+            <p>${error.message}</p>
+            <p>Please check your internet connection and try again.</p>
+        `;
+
+        document.body.innerHTML = "";
+        document.body.appendChild(resultBox);
     }
 }
 
-async function protectSchoolPortal() {
-    const allowed = await checkSchoolNetwork();
-
-    if (!allowed) {
-        document.documentElement.innerHTML = `
-        <html>
-        <head>
-            <title>Access Restricted</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-        </head>
-        <body style="
-            margin:0;
-            font-family:Arial,sans-serif;
-            background:#f4f6f9;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            min-height:100vh;
-            text-align:center;
-        ">
-            <div style="
-                background:white;
-                padding:40px;
-                border-radius:16px;
-                max-width:420px;
-                margin:20px;
-                box-shadow:0 5px 25px rgba(0,0,0,.08);
-            ">
-                <h1 style="color:#dc2626;">Access Restricted</h1>
-                <p>This examination portal is accessible only through the school's Wi-Fi network.</p>
-                <p>Please connect to the school network and try again.</p>
-            </div>
-        </body>
-        </html>`;
-        return false;
-    }
-
-    return true;
-}
-
-// Other page scripts can wait for this promise.
-window.schoolNetworkAllowed = protectSchoolPortal();
+window.addEventListener("load", checkSchoolNetwork);
