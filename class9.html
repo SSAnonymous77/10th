@@ -4,25 +4,48 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Class 9 Examinations</title>
+
+<title>Class 10 Examinations</title>
+
 <style>
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   font-family: Arial, sans-serif;
   background: #f3f6fb;
   color: #172554;
 }
+
 header {
   background: #142d59;
   color: white;
   text-align: center;
   padding: 28px 15px;
 }
+
+header h1 {
+  margin: 0 0 8px;
+}
+
 main {
-  max-width: 850px;
+  max-width: 900px;
   margin: 30px auto;
   padding: 15px;
 }
+
+.back {
+  color: #2457a7;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.back:hover {
+  text-decoration: underline;
+}
+
 .test {
   background: white;
   padding: 22px;
@@ -30,6 +53,11 @@ main {
   border-radius: 12px;
   box-shadow: 0 3px 12px #00000010;
 }
+
+.test h3 {
+  margin-top: 0;
+}
+
 button {
   background: #2457a7;
   color: white;
@@ -39,14 +67,81 @@ button {
   cursor: pointer;
   font-size: 15px;
 }
-button:hover { background: #173c78; }
-.back {
-  color: #2457a7;
-  text-decoration: none;
+
+button:hover {
+  background: #173c78;
 }
-.status { color: #15803d; font-weight: bold; }
+
+.status {
+  color: #15803d;
+  font-weight: bold;
+}
+
+.not-connected {
+  color: #b45309;
+  font-weight: bold;
+}
+
+.exam-container {
+  display: none;
+  margin-top: 22px;
+}
+
+.exam-container iframe {
+  display: block;
+  width: 100%;
+  height: 7494px;
+  border: none;
+}
+
+.exam-tools {
+  background: white;
+  padding: 15px;
+  margin: 15px 0;
+  border-radius: 10px;
+  box-shadow: 0 3px 12px #00000010;
+}
+
+.compact-button {
+  background: #15803d;
+  margin-top: 8px;
+}
+
+.compact-button:hover {
+  background: #166534;
+}
+
+.back-button {
+  background: #64748b;
+  margin-bottom: 15px;
+}
+
+.back-button:hover {
+  background: #475569;
+}
+
+footer {
+  text-align: center;
+  padding: 25px;
+  color: #64748b;
+}
+
+@media (max-width: 600px) {
+  main {
+    margin: 15px auto;
+  }
+
+  .test {
+    padding: 17px;
+  }
+
+  .exam-container iframe {
+    height: 7494px;
+  }
+}
 </style>
 </head>
+
 <body>
 
 <header>
@@ -58,38 +153,133 @@ button:hover { background: #173c78; }
 
 <a class="back" href="index.html">← Back to Home</a>
 
-<h2>Available Examinations</h2>
+<div id="exam-list">
 
-<div class="test">
-  <h3>Computer Science – Test 1</h3>
-  <p>Subject: Computer Science</p>
-  <p class="status">Available</p>
+  <h2>Available Examinations</h2>
 
-  <button onclick="startTest('PASTE_GOOGLE_FORM_LINK_HERE')">
-    Start Examination
-  </button>
+  <!-- COMPUTER SCIENCE -->
+  <div class="test">
+
+    <h3>Computer Science – Test 1</h3>
+
+    <p>Subject: Computer Science</p>
+
+    <p class="status">● Available</p>
+
+    <button onclick="openExam('cs-exam')">
+      Start Examination
+    </button>
+
+  </div>
+
+  <!-- MATHEMATICS -->
+  <div class="test">
+
+    <h3>Mathematics – Test 1</h3>
+
+    <p>Subject: Mathematics</p>
+
+    <p class="not-connected">● Not Connected Yet</p>
+
+    <button onclick="showMessage()">
+      Start Examination
+    </button>
+
+  </div>
+
 </div>
 
-<div class="test">
-  <h3>Mathematics – Test 1</h3>
-  <p>Subject: Mathematics</p>
-  <p class="status">Available</p>
+<!-- COMPUTER SCIENCE EXAMINATION -->
+<div id="cs-exam" class="exam-container">
 
-  <button onclick="startTest('PASTE_GOOGLE_FORM_LINK_HERE')">
-    Start Examination
+  <button class="back-button" onclick="closeExam('cs-exam')">
+    ← Back to Examinations
   </button>
+
+  <h2>Computer Science – Test 1</h2>
+
+  <p>Please complete and submit your examination.</p>
+
+  <!-- SPACE REDUCTION OPTION -->
+  <div class="exam-tools">
+
+    <strong>After submitting your examination:</strong>
+
+    <p>
+      Click the button below to reduce unnecessary empty space
+      and bring the lower part of the webpage closer.
+    </p>
+
+    <button class="compact-button" onclick="compactForm()">
+      Response Submitted? Reduce Empty Space
+    </button>
+
+  </div>
+
+  <iframe
+    id="cs-form"
+    src="https://docs.google.com/forms/d/e/1FAIpQLSeWxeSSb8zMkQod4Y6CZChOTghkQ9I3M8Z1FjWJfSyG30N2bw/viewform?embedded=true"
+    loading="lazy"
+    title="Computer Science Examination">
+    Loading…
+  </iframe>
+
 </div>
 
 </main>
 
+<footer>
+  School Examination Portal
+</footer>
+
 <script>
-function startTest(link) {
-  if (link === 'PASTE_GOOGLE_FORM_LINK_HERE') {
-    alert('This examination has not been connected yet.');
-    return;
-  }
-  window.open(link, '_blank');
+
+function openExam(examId) {
+
+  document.getElementById("exam-list").style.display = "none";
+
+  document.getElementById(examId).style.display = "block";
+
+  // Restore original form height
+  document.getElementById("cs-form").style.height = "7494px";
+
+  window.scrollTo(0, 0);
+
 }
+
+function closeExam(examId) {
+
+  document.getElementById(examId).style.display = "none";
+
+  document.getElementById("exam-list").style.display = "block";
+
+  window.scrollTo(0, 0);
+
+}
+
+function compactForm() {
+
+  const form = document.getElementById("cs-form");
+
+  // Reduce the iframe height after submission
+  form.style.height = "520px";
+
+  // Bring the lower part of the page into view
+  setTimeout(function() {
+    window.scrollTo({
+      top: document.body.scrollHeight,
+      behavior: "smooth"
+    });
+  }, 300);
+
+}
+
+function showMessage() {
+
+  alert("This examination has not been connected yet.");
+
+}
+
 </script>
 
 </body>
