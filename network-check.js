@@ -4,7 +4,7 @@
    ================================== */
 
 // Replace this with your school's PUBLIC IPv4 address
-const SCHOOL_PUBLIC_IP = "192.168.31.1";
+const SCHOOL_PUBLIC_IP = "152.59.118.104";
 
 async function checkSchoolNetwork() {
     try {
