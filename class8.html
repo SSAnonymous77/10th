@@ -367,12 +367,12 @@ async function loadExams() {
       const status = (row[statusIndex] || "").trim().toLowerCase();
 
       if (
-        className.toLowerCase() === CURRENT_CLASS.toLowerCase() &&
-        status === "active" &&
-        subject &&
-        examName &&
-        formLink
-      ) {
+  className.trim().toLowerCase() === "class 8" &&
+  status.trim().toLowerCase() === "active" &&
+  subject &&
+  examName &&
+  formLink
+) {
 
         createExamCard(subject, examName, formLink);
 
