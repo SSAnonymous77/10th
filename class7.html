@@ -1,0 +1,96 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Class 7 Examinations</title>
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f3f6fb;
+  color: #172554;
+}
+header {
+  background: #142d59;
+  color: white;
+  text-align: center;
+  padding: 28px 15px;
+}
+main {
+  max-width: 850px;
+  margin: 30px auto;
+  padding: 15px;
+}
+.test {
+  background: white;
+  padding: 22px;
+  margin-bottom: 18px;
+  border-radius: 12px;
+  box-shadow: 0 3px 12px #00000010;
+}
+button {
+  background: #2457a7;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 15px;
+}
+button:hover { background: #173c78; }
+.back {
+  color: #2457a7;
+  text-decoration: none;
+}
+.status { color: #15803d; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Class 10</h1>
+  <p>Online Examination Centre</p>
+</header>
+
+<main>
+
+<a class="back" href="index.html">← Back to Home</a>
+
+<h2>Available Examinations</h2>
+
+<div class="test">
+  <h3>Computer Science – Test 1</h3>
+  <p>Subject: Computer Science</p>
+  <p class="status">Available</p>
+
+  <button onclick="startTest('PASTE_GOOGLE_FORM_LINK_HERE')">
+    Start Examination
+  </button>
+</div>
+
+<div class="test">
+  <h3>Mathematics – Test 1</h3>
+  <p>Subject: Mathematics</p>
+  <p class="status">Available</p>
+
+  <button onclick="startTest('PASTE_GOOGLE_FORM_LINK_HERE')">
+    Start Examination
+  </button>
+</div>
+
+</main>
+
+<script>
+function startTest(link) {
+  if (link === 'PASTE_GOOGLE_FORM_LINK_HERE') {
+    alert('This examination has not been connected yet.');
+    return;
+  }
+  window.open(link, '_blank');
+}
+</script>
+
+</body>
+</html>
